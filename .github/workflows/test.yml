@@ -1,0 +1,42 @@
+name: Test
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  script:
+    name: run.sh end to end
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - name: Run the tests against the default image version
+        run: |
+          IMAGE_VERSION="$(sed -n '/image-version:/,/default:/s/.*default: "\(.*\)"/\1/p' action.yml)"
+          echo "image-tools $IMAGE_VERSION"
+          IMAGE_VERSION="$IMAGE_VERSION" bash test/run.test.sh
+
+  action:
+    name: The action as a consumer uses it
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - name: Fetch a sample image
+        run: |
+          mkdir -p images
+          curl -fsSL --max-time 60 https://r0k.us/graphics/kodak/kodak/kodim23.png -o images/kodim23.png
+      - id: compare
+        uses: ./
+        with:
+          images: images
+          codecs: jxl,avif,webp
+      - name: Check the outputs
+        run: |
+          test -s "${{ steps.compare.outputs.csv }}"
+          test -s "${{ steps.compare.outputs.report }}"
+          test "${{ steps.compare.outputs.regressed }}" = false

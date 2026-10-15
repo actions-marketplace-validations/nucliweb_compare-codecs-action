@@ -1,0 +1,79 @@
+name: Compare image codecs
+description: Compare JPEG XL, AVIF, WebP, jpegli, mozjpeg and HEIC at equal perceptual quality, and gate on size or quality regressions.
+author: Joan Leon
+branding:
+  icon: image
+  color: orange
+
+inputs:
+  images:
+    description: PNG files or directories of PNGs, relative to the workspace, one per line.
+    required: true
+  target:
+    description: Target ssimulacra2 score each codec is searched to (higher is closer to the original).
+    default: "90"
+  rd:
+    description: Comma-separated targets for rate-distortion mode (e.g. 70,80,85,90,95), with BD-rate against mozjpeg. Replaces target.
+    default: ""
+  codecs:
+    description: Comma-separated subset of jxl,avif,webp,jpegli,mozjpeg,heic. All when empty.
+    default: ""
+  effort:
+    description: Matched encoder effort 0..10 across the codecs that have the knob. Each codec's default when empty.
+    default: ""
+  html:
+    description: Write the interactive HTML report (not available in rate-distortion mode).
+    default: "true"
+  html-max-dim:
+    description: Downscale images embedded in the report above this size. The tool's default when empty.
+    default: ""
+  baseline:
+    description: Path to a baseline JSON. When set, fails if a codec's bytes at equal quality grow or its score drops beyond the tolerances.
+    default: ""
+  tolerance:
+    description: Fractional size growth allowed against the baseline.
+    default: "0.02"
+  quality-tolerance:
+    description: ssimulacra2 points a score may drop against the baseline.
+    default: "0.5"
+  fail-on-regression:
+    description: Fail the step on a regression. When false, only the regressed output reports it.
+    default: "true"
+  output-dir:
+    description: Directory, relative to the workspace, for the CSV, the report and the text output.
+    default: codec-comparison
+  image-version:
+    description: Tag of ghcr.io/nucliweb/image-tools to run. Pins the codec versions, which makes sizes reproducible.
+    default: "0.2.0"
+
+outputs:
+  csv:
+    description: Path to the results CSV.
+    value: ${{ steps.run.outputs.csv }}
+  report:
+    description: Path to the HTML report, empty when none was written.
+    value: ${{ steps.run.outputs.report }}
+  regressed:
+    description: "true when the baseline gate found a regression, otherwise false."
+    value: ${{ steps.run.outputs.regressed }}
+
+runs:
+  using: composite
+  steps:
+    - id: run
+      shell: bash
+      run: bash "$GITHUB_ACTION_PATH/run.sh"
+      env:
+        INPUT_IMAGES: ${{ inputs.images }}
+        INPUT_TARGET: ${{ inputs.target }}
+        INPUT_RD: ${{ inputs.rd }}
+        INPUT_CODECS: ${{ inputs.codecs }}
+        INPUT_EFFORT: ${{ inputs.effort }}
+        INPUT_HTML: ${{ inputs.html }}
+        INPUT_HTML_MAX_DIM: ${{ inputs.html-max-dim }}
+        INPUT_BASELINE: ${{ inputs.baseline }}
+        INPUT_TOLERANCE: ${{ inputs.tolerance }}
+        INPUT_QUALITY_TOLERANCE: ${{ inputs.quality-tolerance }}
+        INPUT_FAIL_ON_REGRESSION: ${{ inputs.fail-on-regression }}
+        INPUT_OUTPUT_DIR: ${{ inputs.output-dir }}
+        INPUT_IMAGE_VERSION: ${{ inputs.image-version }}
