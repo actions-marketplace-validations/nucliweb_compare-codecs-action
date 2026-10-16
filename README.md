@@ -38,6 +38,19 @@ The table goes to the job summary, and the CSV and the interactive HTML report a
     rd: 70,80,85,90,95
 ```
 
+### Opt-in variants
+
+Beside the six formats, four variants each change one encoder setting, so a comparison can show what that setting is worth on your images: `webp-sharp` (WebP with sharp RGB→YUV conversion), `heic-444` (HEIC with full-resolution chroma), `avif-rav1e` (AVIF encoded by rav1e instead of aom) and `jpeg-turbo` (plain libjpeg-turbo). Name them in `codecs`, or use `all`:
+
+```yaml
+- uses: nucliweb/compare-codecs-action@v1
+  with:
+    images: assets/photos
+    codecs: webp,webp-sharp,heic,heic-444
+```
+
+What each one changes, with measurements and references, is in the [image-tools documentation](https://github.com/nucliweb/image-tools/blob/main/compare/README.md#opt-in-variants).
+
 ### Regression gate
 
 With a `baseline`, the step fails when a codec's bytes at equal quality grow more than `tolerance` (2%) or its ssimulacra2 score drops more than `quality-tolerance` (0.5) for any image, so a change to your images or pipeline that makes the output larger, or smaller at a lower quality, is caught.
@@ -53,7 +66,7 @@ With a `baseline`, the step fails when a codec's bytes at equal quality grow mor
 Generate the baseline from a run's `results.csv` with the same image version and target, and commit it. Sizes differ slightly between architectures, so generate it from a CSV produced on the same runner architecture (GitHub's `ubuntu-latest` is amd64):
 
 ```bash
-docker run --rm -v "$PWD:/work" -w /work --entrypoint node ghcr.io/nucliweb/image-tools:0.2.0 \
+docker run --rm -v "$PWD:/work" -w /work --entrypoint node ghcr.io/nucliweb/image-tools:0.3.0 \
   /opt/image-tools/compare/bin/check-regression.js .github/codec-baseline.json results.csv --update --target 90
 ```
 
@@ -83,7 +96,7 @@ Commenting needs `pull-requests: write` in the workflow's permissions; the actio
 | `images` | required | PNG files or directories of PNGs, relative to the workspace, one per line |
 | `target` | `90` | Target ssimulacra2 score |
 | `rd` | | Comma-separated targets for rate-distortion mode; replaces `target` |
-| `codecs` | all | Comma-separated subset of `jxl,avif,webp,jpegli,mozjpeg,heic` |
+| `codecs` | the six formats | Comma-separated subset of `jxl,avif,webp,jpegli,mozjpeg,heic`, plus the [opt-in variants](#opt-in-variants); `all` runs every codec and variant |
 | `effort` | codec default | Matched encoder effort 0..10 (jxl, avif, webp) |
 | `html` | `true` | Write the interactive HTML report (not in rate-distortion mode) |
 | `html-max-dim` | tool default | Downscale images embedded in the report above this size |
@@ -92,7 +105,7 @@ Commenting needs `pull-requests: write` in the workflow's permissions; the actio
 | `quality-tolerance` | `0.5` | ssimulacra2 points a score may drop against the baseline |
 | `fail-on-regression` | `true` | Fail the step on a regression |
 | `output-dir` | `codec-comparison` | Where the CSV, report and text output go |
-| `image-version` | `0.2.0` | Tag of `ghcr.io/nucliweb/image-tools`, which pins the codec versions |
+| `image-version` | `0.3.0` | Tag of `ghcr.io/nucliweb/image-tools`, which pins the codec versions |
 
 ## Outputs
 
