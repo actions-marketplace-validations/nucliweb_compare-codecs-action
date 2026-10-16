@@ -59,6 +59,12 @@ check "writes one CSV row per codec and target" "[ \$(wc -l < '$WS/codec-compari
 check "skips the HTML report" "[ ! -e '$WS/codec-comparison/report.html' ] && [ -z \"\$(output report)\" ]"
 check "puts the RD table in the job summary" "grep -q 'Rate–distortion' '$WS/summary'"
 
+echo "opt-in variant"
+new_workspace
+run_action INPUT_CODECS="webp,webp-sharp" INPUT_HTML="false"
+check "exits 0" "[ $? -eq 0 ]"
+check "measures the variant" "grep -q 'WebP sharp YUV' '$WS/codec-comparison/results.csv'"
+
 echo "baseline gate, no regression"
 WS="$SINGLE_WS"
 docker run --rm -u "$(id -u):$(id -g)" -v "$WS:/work" -w /work --entrypoint node "$IMAGE" \
