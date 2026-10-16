@@ -16,7 +16,7 @@ inputs:
     description: Comma-separated targets for rate-distortion mode (e.g. 70,80,85,90,95), with BD-rate against mozjpeg. Replaces target.
     default: ""
   codecs:
-    description: Comma-separated subset of jxl,avif,webp,jpegli,mozjpeg,heic, plus the opt-in variants webp-sharp,heic-444,avif-rav1e,jpeg-turbo, or "all" for every codec and variant. The six formats when empty.
+    description: Comma-separated subset of jxl,avif,webp,jpegli,mozjpeg,heic, plus the opt-in variants webp-sharp,heic-444,avif-rav1e,avif-svt,jpeg-turbo, or "all" for every codec and variant. The six formats when empty.
     default: ""
   effort:
     description: Matched encoder effort 0..10 across the codecs that have the knob. Each codec's default when empty.
@@ -44,7 +44,7 @@ inputs:
     default: codec-comparison
   image-version:
     description: Tag of ghcr.io/nucliweb/image-tools to run. Pins the codec versions, which makes sizes reproducible.
-    default: "0.3.0"
+    default: "0.4.0"
 
 outputs:
   csv:

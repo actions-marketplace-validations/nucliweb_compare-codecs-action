@@ -65,6 +65,15 @@ run_action INPUT_CODECS="webp,webp-sharp" INPUT_HTML="false"
 check "exits 0" "[ $? -eq 0 ]"
 check "measures the variant" "grep -q 'WebP sharp YUV' '$WS/codec-comparison/results.csv'"
 
+echo "codec failing on an image"
+new_workspace
+docker run --rm -u "$(id -u):$(id -g)" -v "$WS:/work" -w /work --entrypoint magick "$IMAGE" \
+  -size 127x95 gradient:navy-orange images/odd.png
+run_action INPUT_CODECS="jxl,avif-svt" INPUT_HTML="false"
+check "exits 0" "[ $? -eq 0 ]"
+check "keeps measuring the other codec" "grep -q '^odd.png,JPEG XL,-d' '$WS/codec-comparison/results.csv'"
+check "records the failure in the CSV" "grep -q '^odd.png,AVIF SVT-AV1,.*must be even' '$WS/codec-comparison/results.csv'"
+
 echo "baseline gate, no regression"
 WS="$SINGLE_WS"
 docker run --rm -u "$(id -u):$(id -g)" -v "$WS:/work" -w /work --entrypoint node "$IMAGE" \
