@@ -27,9 +27,15 @@ jobs:
     steps:
       - uses: actions/checkout@v7
       - name: Fetch a sample image
+        # A photograph from the CID22 validation set (CC BY-SA 4.0), as in image-tools' demo set.
         run: |
           mkdir -p images
-          curl -fsSL --max-time 60 https://r0k.us/graphics/kodak/kodak/kodim23.png -o images/kodim23.png
+          curl -fsSL --max-time 120 -o cid22.zip \
+            https://cloudinary-marketing-res.cloudinary.com/raw/upload/v1682006008/CID22_validation_set_without_distorted.zip
+          echo "daa95777dc8f2abd086449c1eb1e6636ce178bfc5f7346f4bfdb806375319f63  cid22.zip" | sha256sum -c -
+          unzip -p cid22.zip CID22_validation_set/original/2936831.png > images/cid22-church.png
+          echo "be4bfd85b5c7bcfca45090271b3750ec548b2c6f9bee0883c2374d1592d7e667  images/cid22-church.png" | sha256sum -c -
+          rm cid22.zip
       - id: compare
         uses: ./
         with:
