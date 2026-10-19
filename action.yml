@@ -22,7 +22,7 @@ inputs:
     description: Matched encoder effort 0..10 across the codecs that have the knob. Each codec's default when empty.
     default: ""
   html:
-    description: Write the interactive HTML report (not available in rate-distortion mode).
+    description: Write the interactive HTML report. In rate-distortion mode it plots the curves and BD-rates (image-tools 0.5.0 or later).
     default: "true"
   html-max-dim:
     description: Downscale images embedded in the report above this size. The tool's default when empty.
@@ -44,7 +44,7 @@ inputs:
     default: codec-comparison
   image-version:
     description: Tag of ghcr.io/nucliweb/image-tools to run. Pins the codec versions, which makes sizes reproducible.
-    default: "0.4.0"
+    default: "0.5.0"
 
 outputs:
   csv:

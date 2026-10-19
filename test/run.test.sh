@@ -56,8 +56,16 @@ new_workspace
 run_action INPUT_RD="75,85"
 check "exits 0" "[ $? -eq 0 ]"
 check "writes one CSV row per codec and target" "[ \$(wc -l < '$WS/codec-comparison/results.csv') -eq 5 ]"
-check "skips the HTML report" "[ ! -e '$WS/codec-comparison/report.html' ] && [ -z \"\$(output report)\" ]"
+check "writes the HTML report with the RD curves" "grep -q '\"rd\":{\"targets\":\\[75,85\\]' '$WS/codec-comparison/report.html'"
+check "outputs the report path" "[ \"\$(output report)\" = codec-comparison/report.html ]"
 check "puts the RD table in the job summary" "grep -q 'Rate–distortion' '$WS/summary'"
+
+echo "rate-distortion on an image before 0.5.0"
+new_workspace
+run_action INPUT_RD="75,85" INPUT_CODECS="jxl" INPUT_IMAGE_VERSION="0.4.0"
+check "exits 0" "[ $? -eq 0 ]"
+check "skips the HTML report" "[ ! -e '$WS/codec-comparison/report.html' ] && [ -z \"\$(output report)\" ]"
+check "says why" "grep -q 'needs image-tools 0.5.0' '$WS/log'"
 
 echo "opt-in variant"
 new_workspace

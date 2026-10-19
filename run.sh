@@ -47,10 +47,17 @@ mkdir -p "$WORKSPACE/$OUT"
 csv="$OUT/results.csv"
 args+=(--csv "$csv")
 
+# The report plots rate-distortion curves from image-tools 0.5.0; earlier images
+# reject --html with --rd. Tags that are not a version (latest, sha-…) are recent.
+rd_report_supported() {
+  [[ "$INPUT_IMAGE_VERSION" =~ ^([0-9]+)\.([0-9]+) ]] || return 0
+  [ "${BASH_REMATCH[1]}" -gt 0 ] || [ "${BASH_REMATCH[2]}" -ge 5 ]
+}
+
 report=""
 if [ "${INPUT_HTML}" = "true" ]; then
-  if [ -n "$RD" ]; then
-    echo "::notice::The HTML report is not available in rate-distortion mode; skipping it."
+  if [ -n "$RD" ] && ! rd_report_supported; then
+    echo "::notice::The HTML report in rate-distortion mode needs image-tools 0.5.0 or later; skipping it."
   else
     report="$OUT/report.html"
     args+=(--html "$report")
