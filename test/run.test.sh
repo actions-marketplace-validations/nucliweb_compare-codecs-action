@@ -56,14 +56,31 @@ new_workspace
 run_action INPUT_RD="75,85"
 check "exits 0" "[ $? -eq 0 ]"
 check "writes one CSV row per codec and target" "[ \$(wc -l < '$WS/codec-comparison/results.csv') -eq 5 ]"
-check "skips the HTML report" "[ ! -e '$WS/codec-comparison/report.html' ] && [ -z \"\$(output report)\" ]"
+check "writes the HTML report with the RD curves" "grep -q '\"rd\":{\"targets\":\\[75,85\\]' '$WS/codec-comparison/report.html'"
+check "outputs the report path" "[ \"\$(output report)\" = codec-comparison/report.html ]"
 check "puts the RD table in the job summary" "grep -q 'Rate–distortion' '$WS/summary'"
+
+echo "rate-distortion on an image before 0.5.0"
+new_workspace
+run_action INPUT_RD="75,85" INPUT_CODECS="jxl" INPUT_IMAGE_VERSION="0.4.0"
+check "exits 0" "[ $? -eq 0 ]"
+check "skips the HTML report" "[ ! -e '$WS/codec-comparison/report.html' ] && [ -z \"\$(output report)\" ]"
+check "says why" "grep -q 'needs image-tools 0.5.0' '$WS/log'"
 
 echo "opt-in variant"
 new_workspace
 run_action INPUT_CODECS="webp,webp-sharp" INPUT_HTML="false"
 check "exits 0" "[ $? -eq 0 ]"
 check "measures the variant" "grep -q 'WebP sharp YUV' '$WS/codec-comparison/results.csv'"
+
+echo "codec failing on an image"
+new_workspace
+docker run --rm -u "$(id -u):$(id -g)" -v "$WS:/work" -w /work --entrypoint magick "$IMAGE" \
+  -size 127x95 gradient:navy-orange images/odd.png
+run_action INPUT_CODECS="jxl,avif-svt" INPUT_HTML="false"
+check "exits 0" "[ $? -eq 0 ]"
+check "keeps measuring the other codec" "grep -q '^odd.png,JPEG XL,-d' '$WS/codec-comparison/results.csv'"
+check "records the failure in the CSV" "grep -q '^odd.png,AVIF SVT-AV1,.*must be even' '$WS/codec-comparison/results.csv'"
 
 echo "baseline gate, no regression"
 WS="$SINGLE_WS"
