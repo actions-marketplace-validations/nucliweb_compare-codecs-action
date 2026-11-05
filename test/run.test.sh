@@ -48,6 +48,8 @@ check "writes the HTML report" "[ -s '$WS/codec-comparison/report.html' ]"
 check "outputs the CSV path" "[ \"\$(output csv)\" = codec-comparison/results.csv ]"
 check "outputs the report path" "[ \"\$(output report)\" = codec-comparison/report.html ]"
 check "puts the table in the job summary" "grep -q 'Codec comparison' '$WS/summary'"
+check "reports each encoder's peak memory in the summary" "grep -Eq '\| +memory \|' '$WS/summary'"
+check "adds the peak memory column to the CSV" "head -1 '$WS/codec-comparison/results.csv' | grep -q ',encode_peak_rss_bytes,error\$'"
 check "reports no regression without a baseline" "[ \"\$(output regressed)\" = false ]"
 SINGLE_WS="$WS"
 

@@ -44,7 +44,7 @@ inputs:
     default: codec-comparison
   image-version:
     description: Tag of ghcr.io/nucliweb/image-tools to run. Pins the codec versions, which makes sizes reproducible.
-    default: "0.5.0"
+    default: "0.6.0"
 
 outputs:
   csv:
