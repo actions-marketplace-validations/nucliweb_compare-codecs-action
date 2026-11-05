@@ -14,7 +14,7 @@ Each codec's quality knob is searched until the decoded image reaches the same [
     target: 90
 ```
 
-The table goes to the job summary, and the CSV and the interactive HTML report are written to `codec-comparison/`. Upload them to keep them:
+The table, with each codec's size, quality, encode time and peak memory, goes to the job summary, and the CSV and the interactive HTML report are written to `codec-comparison/`. Upload them to keep them:
 
 ```yaml
 - id: compare
@@ -66,7 +66,7 @@ With a `baseline`, the step fails when a codec's bytes at equal quality grow mor
 Generate the baseline from a run's `results.csv` with the same image version and target, and commit it. Sizes differ slightly between architectures, so generate it from a CSV produced on the same runner architecture (GitHub's `ubuntu-latest` is amd64):
 
 ```bash
-docker run --rm -v "$PWD:/work" -w /work --entrypoint node ghcr.io/nucliweb/image-tools:0.5.0 \
+docker run --rm -v "$PWD:/work" -w /work --entrypoint node ghcr.io/nucliweb/image-tools:0.6.0 \
   /opt/image-tools/compare/bin/check-regression.js .github/codec-baseline.json results.csv --update --target 90
 ```
 
@@ -105,7 +105,7 @@ Commenting needs `pull-requests: write` in the workflow's permissions; the actio
 | `quality-tolerance` | `0.5` | ssimulacra2 points a score may drop against the baseline |
 | `fail-on-regression` | `true` | Fail the step on a regression |
 | `output-dir` | `codec-comparison` | Where the CSV, report and text output go |
-| `image-version` | `0.5.0` | Tag of `ghcr.io/nucliweb/image-tools`, which pins the codec versions |
+| `image-version` | `0.6.0` | Tag of `ghcr.io/nucliweb/image-tools`, which pins the codec versions |
 
 ## Outputs
 
